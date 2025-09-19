@@ -78,7 +78,7 @@ void update(uint32_t time) {
     double dt = (double) (time - last_time);
     last_time = time;
 
-    angle += dt / 1000.0;
+    angle += (double) (((float) dt) / (float) 1000.0);
 
     if (abs(angle - old_angle) >= new_draw_angle_threshold) {
         old_angle = angle;
