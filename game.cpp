@@ -74,7 +74,7 @@ void render(uint32_t time) {
 
 void update(uint32_t time) {
     if (last_time == 0) last_time = time; // first frame init
-    float dt = (float) (time - last_time);
+    double dt = (double) (time - last_time);
     last_time = time;
 
     angle += dt / 1000.0;
