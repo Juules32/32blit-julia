@@ -50,6 +50,7 @@ void update_grid(std::complex<double> c) {
     }
 }
 
+
 void init() {
     blit::set_screen_mode(blit::ScreenMode::hires);
 
