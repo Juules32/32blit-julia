@@ -4,11 +4,11 @@
 
 using namespace std::complex_literals;
 
-#define WIDTH 320
-#define HEIGHT 240
+#define WIDTH 128           // Usually 320
+#define HEIGHT 128          // Usually 240
 #define NUM_COLORS 18
 
-const double zoom = 130;
+const double zoom = 80;     // Usually 130
 const double x_range = WIDTH / zoom;
 const double y_range = HEIGHT / zoom;
 const double new_draw_angle_threshold = 0.1;
@@ -62,7 +62,7 @@ void init() {
 }
 
 void render(uint32_t time) {
-    blit::screen.pen = blit::Pen(150, 150, 0);
+    blit::screen.pen = blit::Pen(0, 0, 0);
     blit::screen.clear();
 
     for(int x=0; x<WIDTH; x++) {
