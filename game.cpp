@@ -1,44 +1,87 @@
 #include "game.hpp"
+#include <iostream>
+#include <complex.h>
 
-using namespace blit;
+using namespace std::complex_literals;
 
-///////////////////////////////////////////////////////////////////////////
-//
-// init()
-//
-// setup your game here
-//
+#define WIDTH 320
+#define HEIGHT 240
+#define NUM_COLORS 18
+
+const double zoom = 130;
+const double x_range = WIDTH / zoom;
+const double y_range = HEIGHT / zoom;
+const double new_draw_angle_threshold = 0.1;
+const double radius = 0.5;
+
+double angle = 0.0;
+double old_angle = -100.0;
+std::complex<double> c = std::complex<double>(radius * cos(angle), radius * sin(angle));
+uint32_t last_time = 0;
+
+int grid[WIDTH][HEIGHT];
+blit::Pen colors[NUM_COLORS];
+
+int in_set(std::complex<double> num, std::complex<double> c) {
+    for (int i = 0; i < NUM_COLORS - 1; i++) {
+        num = num * num + c;
+        if (std::abs(num) > 2) {
+            return i;
+        }
+    }
+    return NUM_COLORS - 1;
+}
+
+double scale_x(int x) {
+    return - x_range + (double)x / WIDTH * x_range * 2;
+}
+
+double scale_y(int y) {
+    return - y_range + (double)y / HEIGHT * y_range * 2;
+}
+
+void update_grid(std::complex<double> c) {
+    for (int i = 0; i < WIDTH; i++)
+    {
+        for (int j = 0; j < HEIGHT; j++)
+        {
+            grid[i][j] = in_set(scale_x(i) + scale_y(j) * 1i, c);
+        }
+    }
+}
+
 void init() {
-    set_screen_mode(ScreenMode::hires);
+    blit::set_screen_mode(blit::ScreenMode::hires);
+
+    for (int i = 0; i < NUM_COLORS; i++)
+    {
+        colors[i] = blit::Pen(30, 200 * i / NUM_COLORS, 130 - 130 * i / NUM_COLORS);
+    }
+    
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-// render(time)
-//
-// This function is called to perform rendering of the game. time is the 
-// amount if milliseconds elapsed since the start of your game
-//
 void render(uint32_t time) {
+    blit::screen.pen = blit::Pen(150, 150, 0);
+    blit::screen.clear();
 
-    // clear the screen -- screen is a reference to the frame buffer and can be used to draw all things with the 32blit
-    screen.clear();
-
-    // draw some text at the top of the screen
-    screen.alpha = 255;
-    screen.mask = nullptr;
-    screen.pen = Pen(255, 255, 255);
-    screen.rectangle(Rect(0, 0, 320, 14));
-    screen.pen = Pen(0, 0, 0);
-    screen.text("Hello 32blit!", minimal_font, Point(5, 4));
+    for(int x=0; x<WIDTH; x++) {
+        for(int y=0; y<HEIGHT; y++) {
+            blit::screen.pen = colors[grid[x][y]];                
+            blit::screen.pixel(blit::Point(x,y));
+        }
+    }
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-// update(time)
-//
-// This is called to update your game state. time is the 
-// amount if milliseconds elapsed since the start of your game
-//
 void update(uint32_t time) {
+    if (last_time == 0) last_time = time; // first frame init
+    float dt = (float) (time - last_time);
+    last_time = time;
+
+    angle += dt / 1000.0;
+
+    if (abs(angle - old_angle) >= new_draw_angle_threshold) {
+        old_angle = angle;
+        c = std::complex<double>(radius * cos(angle), radius * sin(angle));
+        update_grid(c);
+    }
 }
